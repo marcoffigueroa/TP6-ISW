@@ -28,3 +28,14 @@ def validar_fecha_visita(fecha, feriados=None):
     
     # Si pasa todas las validaciones, la fecha es válida
     return True
+
+def validar_forma_pago(forma_pago):
+    # Definir las formas de pago válidas
+    formas_validas = ["EFECTIVO", "TARJETA"]
+    
+    # Validar que la forma de pago esté en la lista de válidas
+    if forma_pago not in formas_validas:
+        raise ValueError("Forma de pago no válida")
+    
+    # Si es válida, no hace nada (no lanza excepción)
+    return True
