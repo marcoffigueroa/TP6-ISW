@@ -6,3 +6,5 @@ def validar_usuario_registrado(usuario):
     if not usuario or not usuario.get("id"):
         raise ValueError("El usuario no está registrado.")
 
+def validar_cantidad_entradas(cantidad):
+    pass
