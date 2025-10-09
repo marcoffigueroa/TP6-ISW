@@ -1,4 +1,5 @@
 from django.test import TestCase
+from comprar_entradas.views import validar_usuario_registrado
 
 # Create your tests here.
 def test_validar_usuario_registrado_con_usuario_valido():
