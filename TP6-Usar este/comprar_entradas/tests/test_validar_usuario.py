@@ -1,3 +1,4 @@
+import pytest
 from comprar_entradas.views import validar_usuario_registrado
 
 # Create your tests here.
