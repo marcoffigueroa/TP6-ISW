@@ -20,3 +20,19 @@ def test_validar_fecha_visita_abierta():
 
     # La función debe devolver True si la fecha es válida
     assert resultado is True
+
+
+def test_validar_fecha_visita_con_parque_cerrado():
+    hoy = date.today()
+
+    # Buscamos la próxima fecha cerrada (lunes o feriado)
+    fecha_cerrada = hoy
+    while fecha_cerrada.weekday() != 0 and fecha_cerrada not in FERIADOS:
+        fecha_cerrada += timedelta(days=1)
+
+    # Debe lanzar ValueError porque la fecha está cerrada
+    with pytest.raises(ValueError) as excinfo:
+        validar_fecha_visita(fecha_cerrada, feriados=FERIADOS)
+
+    # Verificamos que el mensaje contenga "cerrado"
+    assert "cerrado" in str(excinfo.value).lower()
