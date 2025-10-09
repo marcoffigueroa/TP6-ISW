@@ -13,3 +13,6 @@ def validar_cantidad_entradas(cantidad):
     
     # Por ahora retorna True para casos válidos (para que pase el primer test)
     return True
+
+def validar_fecha_visita(fecha, feriados=None):
+    pass
