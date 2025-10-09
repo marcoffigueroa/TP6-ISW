@@ -39,3 +39,14 @@ def validar_forma_pago(forma_pago):
     
     # Si es válida, no hace nada (no lanza excepción)
     return True
+
+def validar_tipo_pase(tipo_pase):
+    # Definir los tipos de pase válidos
+    tipos_validos = ["VIP", "REGULAR"]
+    
+    # Validar que el tipo de pase esté en la lista de válidos
+    if tipo_pase not in tipos_validos:
+        raise ValueError("Tipo de pase no válido")
+    
+    # Si es válido, no hace nada (no lanza excepción)
+    return True
