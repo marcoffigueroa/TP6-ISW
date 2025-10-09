@@ -7,4 +7,4 @@ def validar_usuario_registrado(usuario):
         raise ValueError("El usuario no está registrado.")
 
 def validar_cantidad_entradas(cantidad):
-    pass
+    return True
