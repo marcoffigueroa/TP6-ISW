@@ -20,11 +20,11 @@ def validar_fecha_visita(fecha, feriados=None):
     
     # Validar que no sea lunes (weekday() == 0 es lunes)
     if fecha.weekday() == 0:
-        return False
+        raise ValueError("El parque está cerrado los lunes")
     
     # Validar que no sea feriado
     if fecha in feriados:
-        return False
+        raise ValueError("El parque está cerrado en feriados")
     
     # Si pasa todas las validaciones, la fecha es válida
     return True
