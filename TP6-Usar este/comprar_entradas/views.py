@@ -7,4 +7,9 @@ def validar_usuario_registrado(usuario):
         raise ValueError("El usuario no está registrado.")
 
 def validar_cantidad_entradas(cantidad):
+    # Validar que la cantidad no supere el límite máximo de 10
+    if cantidad > 10:
+        raise ValueError("La cantidad de entradas supera el máximo permitido")
+    
+    # Por ahora retorna True para casos válidos (para que pase el primer test)
     return True
