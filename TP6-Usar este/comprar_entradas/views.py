@@ -15,4 +15,16 @@ def validar_cantidad_entradas(cantidad):
     return True
 
 def validar_fecha_visita(fecha, feriados=None):
-    pass
+    if feriados is None:
+        feriados = []
+    
+    # Validar que no sea lunes (weekday() == 0 es lunes)
+    if fecha.weekday() == 0:
+        return False
+    
+    # Validar que no sea feriado
+    if fecha in feriados:
+        return False
+    
+    # Si pasa todas las validaciones, la fecha es válida
+    return True
