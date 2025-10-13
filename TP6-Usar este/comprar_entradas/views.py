@@ -61,13 +61,20 @@ def validar_datos_visitantes(visitantes):
 def construir_borrador_orden(usuario, fecha_visita, visitantes, tipo_pase, forma_pago, motor_precios):
     # Lógica mínima para hacer pasar el test
     lineas = []
+    total = 0
+    
     for visitante in visitantes:
-        lineas.append(visitante)  # Agregar cada visitante como línea
+        precio = motor_precios(visitante, tipo_pase)
+        linea = visitante.copy()  # Copiar datos del visitante
+        linea["precio"] = precio  # Agregar precio
+        lineas.append(linea)
+        total += precio["monto"]  # Sumar al total
     
     return {
         "usuario": usuario,
         "fecha_visita": fecha_visita,
         "forma_pago": forma_pago,
         "tipo_pase": tipo_pase,
-        "lineas": lineas
+        "lineas": lineas,
+        "total": total
     }
