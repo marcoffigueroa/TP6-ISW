@@ -96,5 +96,12 @@ def realizar_compra(usuario, fecha_visita, cantidad_entradas, visitantes, tipo_p
         redirect_url = enrutador_pagos["iniciar_flujo_tarjeta"](borrador)
         return {"redirect_url": redirect_url}
     
+    # Para forma_pago = "EFECTIVO", devolver instrucciones
+    elif forma_pago == "EFECTIVO":
+        return {
+            "instrucciones": "Dirigirse a la boletería del parque para completar el pago en efectivo",
+            "redirect_url": None
+        }
+    
     # Para otros casos, retornar algo básico
     return {"redirect_url": "https://mercadopago.test/default"}
