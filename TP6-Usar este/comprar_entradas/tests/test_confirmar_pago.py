@@ -156,3 +156,40 @@ def test_confirmar_pago_devuelve_resumen_correcto():
     assert resultado["cantidad_entradas"] == len(orden_existente["lineas"]), "Cantidad de entradas incorrecta"
     assert resultado["fecha_visita"] == orden_existente["fecha_visita"], "Fecha de visita incorrecta"
     assert store[orden_id]["estado"] == "PAGADA", "La orden debería quedar marcada como PAGADA"
+
+def test_confirmar_pago_falla_si_orden_no_existe():
+    # Verificamos que la función exista
+    try:
+        from comprar_entradas.views import confirmar_pago
+    except ImportError:
+        pytest.fail("La función 'confirmar_pago' no está definida o no se puede importar")
+
+    # Arrange
+    orden_id = 99  # ID inexistente
+
+    # Repositorio fake vacío
+    def buscar(id_orden):
+        return None  # No encuentra la orden
+
+    def marcar_pagada(id_orden, momento):
+        raise AssertionError("No debería intentar marcar pagada una orden inexistente")
+
+    repositorio_fake = {"buscar": buscar, "marcar_pagada": marcar_pagada}
+
+    # Servicio de mail fake
+    def enviar_confirmacion(orden):
+        raise AssertionError("No debería enviarse mail si la orden no existe")
+
+    servicio_mail_fake = {"enviar_confirmacion": enviar_confirmacion}
+    reloj_fake = {"ahora": lambda: "2025-10-13T10:00:00Z"}
+
+    notificacion_pago = {"id_orden": orden_id, "estado": "aprobado"}
+
+    # Act & Assert
+    with pytest.raises(Exception):
+        confirmar_pago(
+            notificacion_pago=notificacion_pago,
+            repositorio=repositorio_fake,
+            servicio_mail=servicio_mail_fake,
+            reloj=reloj_fake,
+        )
