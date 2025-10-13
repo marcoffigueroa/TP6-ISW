@@ -130,6 +130,10 @@ def confirmar_pago(notificacion_pago, repositorio, servicio_mail, reloj):
     # Buscar la orden en el repositorio
     orden = repositorio["buscar"](orden_id)
     
+    # Validar que la orden existe
+    if orden is None:
+        raise ValueError("La orden no existe")
+    
     # Marcar la orden como pagada
     momento = reloj["ahora"]()
     repositorio["marcar_pagada"](orden_id, momento)
