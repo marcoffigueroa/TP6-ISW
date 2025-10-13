@@ -78,3 +78,10 @@ def construir_borrador_orden(usuario, fecha_visita, visitantes, tipo_pase, forma
         "lineas": lineas,
         "total": total
     }
+
+def calcular_total(borrador, motor_precios):
+    # Lógica mínima para hacer pasar el test
+    total = 0
+    for linea in borrador["lineas"]:
+        total += linea["precio"]["monto"]
+    return total
