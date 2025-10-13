@@ -3,7 +3,7 @@ import pytest
 def test_validar_datos_visitantes_correctos():
     # Verificamos que la función exista
     try:
-        from views import validar_datos_visitantes
+        from comprar_entradas.views import validar_datos_visitantes
     except ImportError:
         pytest.fail("La función 'validar_datos_visitantes' no está definida o no se puede importar")
 
