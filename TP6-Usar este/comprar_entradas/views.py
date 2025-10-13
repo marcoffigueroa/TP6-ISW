@@ -52,5 +52,8 @@ def validar_tipo_pase(tipo_pase):
     return True
 
 def validar_datos_visitantes(visitantes):
-    # Lógica mínima para hacer pasar el test
+    # Validar que cada visitante tenga los datos requeridos
+    for visitante in visitantes:
+        if "edad" not in visitante or "nombre" not in visitante:
+            raise ValueError("Faltan datos del visitante")
     return True
