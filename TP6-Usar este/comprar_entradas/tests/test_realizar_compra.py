@@ -309,7 +309,7 @@ def test_realizar_compra_falla_si_forma_pago_no_especificada():
 def test_realizar_compra_valida_datos_visitantes_correctamente():
     # Verificamos que la función exista
     try:
-        from entradas.domain.casos_uso import realizar_compra
+        from comprar_entradas.views import realizar_compra
     except ImportError:
         pytest.fail("La función 'realizar_compra' no está definida o no se puede importar")
 
@@ -357,4 +357,3 @@ def test_realizar_compra_valida_datos_visitantes_correctamente():
             reloj=reloj_fake,
         )
 
-        

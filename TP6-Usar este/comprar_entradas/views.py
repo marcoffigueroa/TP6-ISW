@@ -98,6 +98,9 @@ def realizar_compra(usuario, fecha_visita, cantidad_entradas, visitantes, tipo_p
     # Validar forma de pago
     validar_forma_pago(forma_pago)
     
+    # Validar datos de visitantes
+    validar_datos_visitantes(visitantes)
+    
     # Validar que el parque esté abierto en la fecha de visita
     if not proveedor_horarios(fecha_visita):
         raise ValueError("El parque está cerrado en la fecha seleccionada")
