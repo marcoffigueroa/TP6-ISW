@@ -89,6 +89,9 @@ def calcular_total(borrador, motor_precios):
 def realizar_compra(usuario, fecha_visita, cantidad_entradas, visitantes, tipo_pase, forma_pago, 
                    proveedor_horarios, motor_precios, repositorio, enrutador_pagos, servicio_mail, reloj):
     # Lógica mínima para hacer pasar el test
+    # Validar usuario registrado
+    validar_usuario_registrado(usuario)
+    
     # Para forma_pago = "TARJETA", usar el enrutador de pagos
     if forma_pago == "TARJETA":
         # Crear un borrador básico para pasar al enrutador
