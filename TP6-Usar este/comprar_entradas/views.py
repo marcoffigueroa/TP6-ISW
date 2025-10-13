@@ -57,3 +57,17 @@ def validar_datos_visitantes(visitantes):
         if "edad" not in visitante or "nombre" not in visitante:
             raise ValueError("Faltan datos del visitante")
     return True
+
+def construir_borrador_orden(usuario, fecha_visita, visitantes, tipo_pase, forma_pago, motor_precios):
+    # Lógica mínima para hacer pasar el test
+    lineas = []
+    for visitante in visitantes:
+        lineas.append(visitante)  # Agregar cada visitante como línea
+    
+    return {
+        "usuario": usuario,
+        "fecha_visita": fecha_visita,
+        "forma_pago": forma_pago,
+        "tipo_pase": tipo_pase,
+        "lineas": lineas
+    }
