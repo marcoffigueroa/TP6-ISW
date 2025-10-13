@@ -92,6 +92,10 @@ def realizar_compra(usuario, fecha_visita, cantidad_entradas, visitantes, tipo_p
     # Validar usuario registrado
     validar_usuario_registrado(usuario)
     
+    # Validar que el parque esté abierto en la fecha de visita
+    if not proveedor_horarios(fecha_visita):
+        raise ValueError("El parque está cerrado en la fecha seleccionada")
+    
     # Para forma_pago = "TARJETA", usar el enrutador de pagos
     if forma_pago == "TARJETA":
         # Crear un borrador básico para pasar al enrutador
