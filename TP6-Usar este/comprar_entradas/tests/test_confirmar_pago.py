@@ -4,7 +4,7 @@ import pytest
 def test_confirmar_pago_marca_orden_pagada():
     # Verificamos que la función exista
     try:
-        from entradas.domain.casos_uso import confirmar_pago
+        from comprar_entradas.views import confirmar_pago
     except ImportError:
         pytest.fail("La función 'confirmar_pago' no está definida o no se puede importar")
 

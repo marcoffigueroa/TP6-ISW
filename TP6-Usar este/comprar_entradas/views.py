@@ -121,3 +121,24 @@ def realizar_compra(usuario, fecha_visita, cantidad_entradas, visitantes, tipo_p
     
     # Para otros casos, retornar algo básico
     return {"redirect_url": "https://mercadopago.test/default"}
+
+def confirmar_pago(notificacion_pago, repositorio, servicio_mail, reloj):
+    # Lógica mínima para hacer pasar el test
+    # Obtener el ID de la orden desde la notificación
+    orden_id = notificacion_pago["id_orden"]
+    
+    # Buscar la orden en el repositorio
+    orden = repositorio["buscar"](orden_id)
+    
+    # Marcar la orden como pagada
+    momento = reloj["ahora"]()
+    repositorio["marcar_pagada"](orden_id, momento)
+    
+    # Enviar confirmación por email
+    servicio_mail["enviar_confirmacion"](orden)
+    
+    # Retornar información de la orden
+    return {
+        "cantidad_entradas": len(orden["lineas"]),
+        "fecha_visita": orden["fecha_visita"]
+    }
