@@ -207,3 +207,51 @@ def test_realizar_compra_falla_si_fecha_cerrada():
             servicio_mail=servicio_mail_fake,
             reloj=reloj_fake,
         )
+
+def test_realizar_compra_falla_si_cantidad_mayor_a_limite():
+    # Verificamos que la función exista
+    try:
+        from comprar_entradas.views import realizar_compra
+    except ImportError:
+        pytest.fail("La función 'realizar_compra' no está definida o no se puede importar")
+
+    # Arrange
+    usuario = {"id": 1, "nombre": "Marco"}
+    fecha_visita = date.today()
+    # 11 visitantes (supera el límite de 10)
+    visitantes = [{"nombre": f"Visitante{i}", "edad": 20+i} for i in range(11)]
+    tipo_pase = "REGULAR"
+    forma_pago = "TARJETA"
+
+    # Mocks simples
+    proveedor_horarios_mock = lambda fecha: True
+    motor_precios_mock = lambda visitante, tipo_pase: {"monto": 10000, "moneda": "ARS"}
+    repositorio_fake = {
+        "guardar_pendiente": lambda borrador: {"id": 1, "estado": "PENDIENTE"}
+    }
+    enrutador_pagos_mock = {
+        "iniciar_flujo_tarjeta": lambda orden: "https://mercadopago.test/checkout/abc123"
+    }
+
+    def enviar_confirmacion(orden):
+        raise AssertionError("No debería enviarse mail cuando se supera el límite de entradas")
+
+    servicio_mail_fake = {"enviar_confirmacion": enviar_confirmacion}
+    reloj_fake = {"ahora": lambda: "2025-10-13T10:00:00Z"}
+
+    # Act & Assert
+    with pytest.raises(Exception):
+        realizar_compra(
+            usuario=usuario,
+            fecha_visita=fecha_visita,
+            cantidad_entradas=len(visitantes),
+            visitantes=visitantes,
+            tipo_pase=tipo_pase,
+            forma_pago=forma_pago,
+            proveedor_horarios=proveedor_horarios_mock,
+            motor_precios=motor_precios_mock,
+            repositorio=repositorio_fake,
+            enrutador_pagos=enrutador_pagos_mock,
+            servicio_mail=servicio_mail_fake,
+            reloj=reloj_fake,
+        )
