@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprar Entradas - Parque de Diversiones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Comprar Entradas</h2>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post" id="comprarForm">
+                            {% csrf_token %}
+                            
+                            <!-- Datos del Usuario -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary"><i class="fas fa-user me-2"></i>Datos del Usuario</h5>
+                                    <hr>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.usuario_nombre.id_for_label }}" class="form-label">{{ form.usuario_nombre.label }}</label>
+                                    {{ form.usuario_nombre }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.usuario_email.id_for_label }}" class="form-label">{{ form.usuario_email.label }}</label>
+                                    {{ form.usuario_email }}
+                                </div>
+                            </div>
+
+                            <!-- Detalles de la Visita -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary"><i class="fas fa-calendar-alt me-2"></i>Detalles de la Visita</h5>
+                                    <hr>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="{{ form.fecha_visita.id_for_label }}" class="form-label">{{ form.fecha_visita.label }}</label>
+                                    {{ form.fecha_visita }}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="{{ form.tipo_pase.id_for_label }}" class="form-label">{{ form.tipo_pase.label }}</label>
+                                    {{ form.tipo_pase }}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="{{ form.forma_pago.id_for_label }}" class="form-label">{{ form.forma_pago.label }}</label>
+                                    {{ form.forma_pago }}
+                                </div>
+                            </div>
+
+                            <!-- Cantidad de Visitantes -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.cantidad_visitantes.id_for_label }}" class="form-label">{{ form.cantidad_visitantes.label }}</label>
+                                    {{ form.cantidad_visitantes }}
+                                </div>
+                            </div>
+
+                            <!-- Datos de Visitantes -->
+                            <div class="mb-4">
+                                <h5 class="text-primary"><i class="fas fa-users me-2"></i>Datos de los Visitantes</h5>
+                                <hr>
+                                <div id="visitantes-container">
+                                    <!-- Los campos de visitantes se generan dinámicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Resumen del Pedido -->
+                            <div id="resumen-pedido" class="mb-4" style="display: none;">
+                                <h5 class="text-primary"><i class="fas fa-receipt me-2"></i>Resumen del Pedido</h5>
+                                <hr>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div id="resumen-content"></div>
+                                        <hr>
+                                        <h6 class="text-end">Total: $<span id="total-amount">0</span></h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-shopping-cart me-2"></i>Proceder al Pago
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Resultado -->
+    <div class="modal fade" id="resultadoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultadoModalTitle">Resultado de la Compra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="resultadoModalBody">
+                    <!-- Contenido dinámico -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cantidadInput = document.getElementById('cantidad_visitantes');
+            const visitantesContainer = document.getElementById('visitantes-container');
+            const resumenPedido = document.getElementById('resumen-pedido');
+            const fechaInput = document.querySelector('[name="fecha_visita"]');
+            
+            // Feriados hardcodeados en JavaScript
+            const feriados = [
+                '2024-01-01', '2024-02-12', '2024-02-13', '2024-03-24', '2024-04-02',
+                '2024-05-01', '2024-05-25', '2024-06-17', '2024-06-20', '2024-07-09',
+                '2024-08-17', '2024-10-12', '2024-11-20', '2024-12-08', '2024-12-25',
+                '2025-01-01', '2025-03-03', '2025-03-04', '2025-03-24', '2025-04-02',
+                '2025-05-01', '2025-05-25', '2025-06-16', '2025-06-20', '2025-07-09',
+                '2025-08-17', '2025-10-12', '2025-11-20', '2025-12-08', '2025-12-25'
+            ];
+            
+            // Función para validar fecha
+            function validarFecha(fecha) {
+                const fechaObj = new Date(fecha + 'T00:00:00');
+                const fechaStr = fecha;
+                
+                // Validar lunes (0 = domingo, 1 = lunes, etc.)
+                if (fechaObj.getDay() === 1) {
+                    return "El parque está cerrado los lunes";
+                }
+                
+                // Validar feriados
+                if (feriados.includes(fechaStr)) {
+                    return "El parque está cerrado en feriados";
+                }
+                
+                return null;
+            }
+            
+            // Event listener para fecha
+            if (fechaInput) {
+                fechaInput.addEventListener('change', function() {
+                    const fecha = this.value;
+                    if (fecha) {
+                        const error = validarFecha(fecha);
+                        
+                        // Remover alertas previas
+                        const alertaPrevia = document.getElementById('alerta-fecha');
+                        if (alertaPrevia) {
+                            alertaPrevia.remove();
+                        }
+                        
+                        if (error) {
+                            // Mostrar error
+                            const alerta = document.createElement('div');
+                            alerta.id = 'alerta-fecha';
+                            alerta.className = 'alert alert-danger mt-2';
+                            alerta.textContent = error;
+                            this.parentNode.appendChild(alerta);
+                            this.style.borderColor = '#dc3545';
+                        } else {
+                            // Fecha válida
+                            this.style.borderColor = '#28a745';
+                        }
+                    }
+                });
+            }
+            
+            // Función para generar campos de visitantes
+            function generarCamposVisitantes(cantidad) {
+                visitantesContainer.innerHTML = '';
+                
+                for (let i = 0; i < cantidad; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'row mb-3';
+                    div.innerHTML = `
+                        <div class="col-12">
+                            <h6>Visitante ${i + 1}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="visitante_${i}_nombre" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Edad</label>
+                            <input type="number" name="visitante_${i}_edad" class="form-control" min="0" max="120" required>
+                        </div>
+                    `;
+                    visitantesContainer.appendChild(div);
+                }
+                
+                if (cantidad > 0) {
+                    generarResumen();
+                }
+            }
+            
+            // Función para generar resumen
+            function generarResumen() {
+                const tipoPase = document.querySelector('[name="tipo_pase"]').value;
+                const cantidad = parseInt(cantidadInput.value) || 0;
+                
+                if (cantidad > 0) {
+                    // Precios simulados (se calculan en el backend)
+                    const precioRegular = tipoPase === 'VIP' ? 5000 : 3000;
+                    const total = cantidad * precioRegular;
+                    
+                    document.getElementById('resumen-content').innerHTML = `
+                        <p><strong>Tipo de pase:</strong> ${tipoPase}</p>
+                        <p><strong>Cantidad de visitantes:</strong> ${cantidad}</p>
+                        <p><strong>Precio por entrada:</strong> $${precioRegular}</p>
+                    `;
+                    document.getElementById('total-amount').textContent = total;
+                    resumenPedido.style.display = 'block';
+                } else {
+                    resumenPedido.style.display = 'none';
+                }
+            }
+            
+            // Event listeners
+            cantidadInput.addEventListener('input', function() {
+                const cantidad = parseInt(this.value) || 0;
+                if (cantidad >= 1 && cantidad <= 10) {
+                    generarCamposVisitantes(cantidad);
+                } else {
+                    visitantesContainer.innerHTML = '';
+                    resumenPedido.style.display = 'none';
+                }
+            });
+            
+            document.querySelector('[name="tipo_pase"]').addEventListener('change', generarResumen);
+        });
+    </script>
+</body>
+</html>
