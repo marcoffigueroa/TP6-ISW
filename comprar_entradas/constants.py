@@ -35,3 +35,47 @@ FERIADOS = [
     datetime.date(2025, 12, 8),  # Inmaculada Concepción de María
     datetime.date(2025, 12, 25), # Navidad
 ]
+
+# Listado de usuarios registrados
+USUARIOS_REGISTRADOS = [
+    {
+        'nombre': 'Tomas Vergara',
+        'mail': 'tomas.vergara@example.com',
+        'registrado': True
+    },
+    {
+        'nombre': 'Marco Figueroa',
+        'mail': 'marco.figueroa@example.com',
+        'registrado': True
+    },
+    {
+        'nombre': 'Juan Cruz Bordino',
+        'mail': 'juancruz.bordino@example.com',
+        'registrado': True
+    },
+    {
+        'nombre': 'Tiziana Carrizo',
+        'mail': 'tiziana.carrizo@example.com',
+        'registrado': True
+    },
+    {
+        'nombre': 'Ignacio Jose Maspero',
+        'mail': 'ignacio.maspero@example.com',
+        'registrado': True
+    },
+    {
+        'nombre': 'Agustin Rey Laje',
+        'mail': 'agustin.reylaje@example.com',
+        'registrado': True
+    },
+    {
+        'nombre': 'Salvador Gibert',
+        'mail': 'salvador.gibert@example.com',
+        'registrado': True
+    },
+    {
+        'nombre': 'Alena Ariza',
+        'mail': 'alena.ariza@example.com',
+        'registrado': True
+    }
+]

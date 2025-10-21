@@ -10,7 +10,7 @@ def test_realizar_compra_tarjeta_redirige_a_mercadopago():
         pytest.fail("La función 'realizar_compra' no está definida o no se puede importar")
 
     # Arrange
-    usuario = {"id": 1, "nombre": "Marco"}
+    usuario = {"id": 1, "nombre": "Marco Figueroa", "email": "marco.figueroa@example.com"}
     fecha_visita = date.today()
     visitantes = [
         {"nombre": "Ana", "edad": 25},
@@ -61,7 +61,7 @@ def test_realizar_compra_efectivo_devuelve_instrucciones():
         pytest.fail("La función 'realizar_compra' no está definida o no se puede importar")
 
     # Arrange
-    usuario = {"id": 1, "nombre": "Marco"}
+    usuario = {"id": 1, "nombre": "Marco Figueroa", "email": "marco.figueroa@example.com"}
     fecha_visita = date.today()
     visitantes = [
         {"nombre": "Ana", "edad": 25},

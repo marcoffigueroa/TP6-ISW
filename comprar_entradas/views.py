@@ -7,14 +7,26 @@ import datetime
 import json
 import random
 
-# Importar los feriados del nuevo archivo
-from .constants import FERIADOS
+# Importar los feriados y usuarios registrados del archivo constants
+from .constants import FERIADOS, USUARIOS_REGISTRADOS
 
 # Create your views here.
 
 def validar_usuario_registrado(usuario):
     if not usuario or not usuario.get("id"):
         raise ValueError("El usuario no está registrado.")
+    
+    # Validar que el usuario esté en la lista de usuarios registrados
+    email_usuario = usuario.get("email")
+    usuario_encontrado = False
+    
+    for usuario_reg in USUARIOS_REGISTRADOS:
+        if usuario_reg.get('mail') == email_usuario and usuario_reg.get('registrado'):
+            usuario_encontrado = True
+            break
+    
+    if not usuario_encontrado:
+        raise ValueError("El usuario no está en la lista de usuarios registrados.")
 
 def validar_cantidad_entradas(cantidad):
     # Validar que la cantidad no supere el límite máximo de 10
@@ -245,6 +257,9 @@ def comprar_entradas_view(request):
                     "email": form.cleaned_data['usuario_email']
                 }
                 
+                # VALIDAR USUARIO REGISTRADO
+                validar_usuario_registrado(usuario)
+                
                 fecha_visita = form.cleaned_data['fecha_visita']
                 tipo_pase = form.cleaned_data['tipo_pase']
                 forma_pago = form.cleaned_data['forma_pago']
@@ -321,7 +336,11 @@ def comprar_entradas_view(request):
     # Pasar feriados al template para validación en JavaScript
     feriados_json = json.dumps([f.strftime('%Y-%m-%d') for f in FERIADOS])
     
+    # Pasar usuarios registrados al template
+    usuarios_registrados_json = json.dumps(USUARIOS_REGISTRADOS)
+    
     return render(request, 'comprar_entradas.html', {
         'form': form,
-        'feriados_json': feriados_json
+        'feriados_json': feriados_json,
+        'usuarios_registrados_json': usuarios_registrados_json
     })

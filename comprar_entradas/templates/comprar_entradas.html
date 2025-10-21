@@ -37,10 +37,14 @@
                                 <div class="col-md-6">
                                     <label for="{{ form.usuario_nombre.id_for_label }}" class="form-label">{{ form.usuario_nombre.label }}</label>
                                     {{ form.usuario_nombre }}
+                                    <div id="nombre-sugerencias" class="list-group position-absolute" style="z-index: 1000; display: none;"></div>
+                                    <small class="form-text text-muted">Seleccione su nombre de la lista</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="{{ form.usuario_email.id_for_label }}" class="form-label">{{ form.usuario_email.label }}</label>
                                     {{ form.usuario_email }}
+                                    <div id="email-validacion" class="mt-1"></div>
+                                    <small class="form-text text-muted">Debe ser un email registrado</small>
                                 </div>
                             </div>
 
@@ -131,6 +135,14 @@
             const visitantesContainer = document.getElementById('visitantes-container');
             const resumenPedido = document.getElementById('resumen-pedido');
             const fechaInput = document.querySelector('[name="fecha_visita"]');
+            const nombreInput = document.querySelector('[name="usuario_nombre"]');
+            const emailInput = document.querySelector('[name="usuario_email"]');
+            const nombreSugerencias = document.getElementById('nombre-sugerencias');
+            const emailValidacion = document.getElementById('email-validacion');
+            const form = document.getElementById('comprarForm');
+            
+            // Usuarios registrados desde el backend
+            const usuariosRegistrados = {{ usuarios_registrados_json|safe }};
             
             // Feriados hardcodeados en JavaScript
             const feriados = [
@@ -141,6 +153,20 @@
                 '2025-05-01', '2025-05-25', '2025-06-16', '2025-06-20', '2025-07-09',
                 '2025-08-17', '2025-10-12', '2025-11-20', '2025-12-08', '2025-12-25'
             ];
+            
+            // Función para validar usuario registrado
+            function validarUsuarioRegistrado(email) {
+                return usuariosRegistrados.find(u => u.mail === email && u.registrado);
+            }
+            
+            // Función para buscar usuarios por nombre
+            function buscarUsuariosPorNombre(nombre) {
+                if (!nombre || nombre.length < 2) return [];
+                const nombreLower = nombre.toLowerCase();
+                return usuariosRegistrados.filter(u => 
+                    u.nombre.toLowerCase().includes(nombreLower) && u.registrado
+                );
+            }
             
             // Función para validar fecha
             function validarFecha(fecha) {
@@ -158,6 +184,66 @@
                 }
                 
                 return null;
+            }
+            
+            // Event listener para nombre (autocompletado)
+            if (nombreInput) {
+                nombreInput.addEventListener('input', function() {
+                    const nombre = this.value;
+                    const usuarios = buscarUsuariosPorNombre(nombre);
+                    
+                    if (usuarios.length > 0 && nombre.length >= 2) {
+                        nombreSugerencias.innerHTML = '';
+                        usuarios.forEach(usuario => {
+                            const item = document.createElement('button');
+                            item.type = 'button';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = usuario.nombre;
+                            item.onclick = function() {
+                                nombreInput.value = usuario.nombre;
+                                emailInput.value = usuario.mail;
+                                nombreSugerencias.style.display = 'none';
+                                validarEmailEnTiempoReal();
+                            };
+                            nombreSugerencias.appendChild(item);
+                        });
+                        nombreSugerencias.style.display = 'block';
+                    } else {
+                        nombreSugerencias.style.display = 'none';
+                    }
+                });
+                
+                // Cerrar sugerencias al hacer clic fuera
+                document.addEventListener('click', function(e) {
+                    if (e.target !== nombreInput) {
+                        nombreSugerencias.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Función para validar email en tiempo real
+            function validarEmailEnTiempoReal() {
+                const email = emailInput.value;
+                if (email) {
+                    const usuario = validarUsuarioRegistrado(email);
+                    if (usuario) {
+                        emailValidacion.innerHTML = '<small class="text-success"><i class="fas fa-check-circle"></i> Usuario registrado: ' + usuario.nombre + '</small>';
+                        emailInput.style.borderColor = '#28a745';
+                    } else {
+                        emailValidacion.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle"></i> Email no registrado en el sistema</small>';
+                        emailInput.style.borderColor = '#dc3545';
+                    }
+                }
+            }
+            
+            // Event listener para email
+            if (emailInput) {
+                emailInput.addEventListener('blur', validarEmailEnTiempoReal);
+                emailInput.addEventListener('input', function() {
+                    if (this.value.includes('@')) {
+                        validarEmailEnTiempoReal();
+                    }
+                });
             }
             
             // Event listener para fecha
@@ -188,6 +274,19 @@
                     }
                 });
             }
+            
+            // Validación antes de enviar el formulario
+            form.addEventListener('submit', function(e) {
+                const email = emailInput.value;
+                const usuario = validarUsuarioRegistrado(email);
+                
+                if (!usuario) {
+                    e.preventDefault();
+                    alert('El email ingresado no está registrado en el sistema. Por favor, seleccione un usuario válido.');
+                    emailInput.focus();
+                    return false;
+                }
+            });
             
             // Función para generar campos de visitantes
             function generarCamposVisitantes(cantidad) {
