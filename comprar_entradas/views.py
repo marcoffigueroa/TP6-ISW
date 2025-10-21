@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from .forms import ComprarEntradasForm
 import datetime
 import json
+import random
 
 # Importar los feriados del nuevo archivo
 from .constants import FERIADOS
@@ -26,6 +27,11 @@ def validar_cantidad_entradas(cantidad):
 def validar_fecha_visita(fecha, feriados=None):
     if feriados is None:
         feriados = []
+    
+    # Validar que la fecha no sea anterior a hoy
+    hoy = datetime.date.today()
+    if fecha < hoy:
+        raise ValueError("No se pueden comprar entradas para fechas pasadas")
     
     # Validar que no sea lunes (weekday() == 0 es lunes)
     if fecha.weekday() == 0:
@@ -126,7 +132,7 @@ def realizar_compra(usuario, fecha_visita, cantidad_entradas, visitantes, tipo_p
         
         redirect_url = enrutador_pagos["iniciar_flujo_tarjeta"](orden)
         return {"redirect_url": redirect_url}
-    
+
     # Para forma_pago = "EFECTIVO", devolver instrucciones
     elif forma_pago == "EFECTIVO":
         # Crear borrador y guardarlo si es necesario
@@ -170,23 +176,13 @@ def confirmar_pago(notificacion_pago, repositorio, servicio_mail, reloj):
 # Motor de precios de ejemplo (implementación simple)
 def motor_precios_simple(visitante, tipo_pase):
     """
-    Motor de precios básico que calcula el precio según edad y tipo de pase.
+    Motor de precios básico que calcula el precio según el tipo de pase.
     """
-    edad = visitante.get('edad', 0)
-    
-    # Precios base
+    # Precios fijos según tipo de pase
     if tipo_pase == "VIP":
-        precio_base = 5000
+        monto = 5000
     else:  # REGULAR
-        precio_base = 3000
-    
-    # Descuentos por edad
-    if edad < 12:  # Niños
-        monto = precio_base * 0.5
-    elif edad >= 65:  # Tercera edad
-        monto = precio_base * 0.7
-    else:  # Adultos
-        monto = precio_base
+        monto = 3000
     
     return {"monto": monto}
 
@@ -269,29 +265,7 @@ def comprar_entradas_view(request):
                             'edad': int(edad_str)
                         })
                 
-                # Usar las funciones existentes con dependencias simuladas
-                resultado = realizar_compra(
-                    usuario=usuario,
-                    fecha_visita=fecha_visita,
-                    cantidad_entradas=cantidad_visitantes,
-                    visitantes=visitantes,
-                    tipo_pase=tipo_pase,
-                    forma_pago=forma_pago,
-                    proveedor_horarios=proveedor_horarios_simple,
-                    motor_precios=motor_precios_simple,  # Agregar motor_precios
-                    repositorio=repositorio_simple(),
-                    enrutador_pagos=enrutador_pagos_simple(),
-                    servicio_mail=servicio_mail_simple(),
-                    reloj=reloj_simple()
-                )
-                
-                # Manejar el resultado según la forma de pago
-                if forma_pago == "TARJETA":
-                    messages.success(request, f"Redirigiendo al pago con tarjeta: {resultado['redirect_url']}")
-                elif forma_pago == "EFECTIVO":
-                    messages.success(request, resultado['instrucciones'])
-                
-                # Construir borrador para mostrar resumen
+                # Construir borrador con precios calculados
                 borrador = construir_borrador_orden(
                     usuario=usuario,
                     fecha_visita=fecha_visita,
@@ -301,7 +275,40 @@ def comprar_entradas_view(request):
                     motor_precios=motor_precios_simple
                 )
                 
-                messages.info(request, f"Total de la compra: ${borrador['total']}")
+                # SI ES TARJETA, REDIRIGIR A MERCADO PAGO
+                if forma_pago == "TARJETA":
+                    # Preparar datos para la template de Mercado Pago
+                    visitantes_con_precio = []
+                    for linea in borrador['lineas']:
+                        visitantes_con_precio.append({
+                            'nombre': linea['nombre'],
+                            'edad': linea['edad'],
+                            'precio': linea['precio']['monto']
+                        })
+                    
+                    return render(request, 'mercadopago_checkout.html', {
+                        'fecha_visita': fecha_visita,
+                        'tipo_pase': tipo_pase,
+                        'cantidad_entradas': cantidad_visitantes,
+                        'visitantes': visitantes_con_precio,
+                        'total': borrador['total'],
+                        'usuario': usuario
+                    })
+                
+                # Para EFECTIVO, REDIRIGIR A COMPROBANTE DE RESERVA
+                elif forma_pago == "EFECTIVO":
+                    # Generar número de reserva único
+                    numero_reserva = f"RES{random.randint(100000, 999999)}"
+                    
+                    return render(request, 'comprobante_reserva.html', {
+                        'numero_reserva': numero_reserva,
+                        'fecha_visita': fecha_visita,
+                        'tipo_pase': tipo_pase,
+                        'cantidad_entradas': cantidad_visitantes,
+                        'visitantes': visitantes,
+                        'total': borrador['total'],
+                        'usuario': usuario
+                    })
                 
             except ValueError as e:
                 messages.error(request, str(e))

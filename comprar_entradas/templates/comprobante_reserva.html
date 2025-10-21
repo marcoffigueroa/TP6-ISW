@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante de Reserva - Parque de Diversiones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .ticket-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .qr-code svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .reservation-number {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: #0d6efd;
+        }
+
+        .total-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .visitor-badge {
+            background-color: #e7f1ff;
+            border-left: 4px solid #0d6efd;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #dee2e6 !important;
+            }
+        }
+
+        .info-icon {
+            width: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <!-- Header del Comprobante -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white text-center py-4">
+                        <h1 class="mb-2"><i class="fas fa-ticket-alt me-2"></i>Comprobante de Reserva</h1>
+                        <p class="mb-0">Parque de Diversiones</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Número de Reserva -->
+                        <div class="text-center mb-4 p-4 bg-light rounded border border-primary border-2">
+                            <p class="text-muted mb-2 text-uppercase fw-bold" style="font-size: 12px; letter-spacing: 1px;">
+                                Número de Reserva
+                            </p>
+                            <div class="reservation-number">{{ numero_reserva }}</div>
+                        </div>
+
+                        <!-- Alerta de Instrucciones -->
+                        <div class="alert alert-warning border-start border-warning border-4 mb-4" role="alert">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Importante
+                            </h5>
+                            <p class="mb-0">
+                                Presentá este comprobante en la boletería del parque junto con el pago en efectivo.
+                                <strong>Conservá este ticket hasta completar tu compra.</strong>
+                            </p>
+                        </div>
+
+                        <!-- Información de la Reserva -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Detalles de la Reserva
+                                </h5>
+                                <hr>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-calendar-alt text-primary info-icon me-2"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Fecha de Visita</small>
+                                                <strong>{{ fecha_visita|date:"d/m/Y" }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-star text-primary info-icon me-2"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Tipo de Pase</small>
+                                                <strong>{{ tipo_pase }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-users text-primary info-icon me-2"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Cantidad de Entradas</small>
+                                                <strong>{{ cantidad_entradas }} entrada{{ cantidad_entradas|pluralize }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-money-bill-wave text-primary info-icon me-2"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Forma de Pago</small>
+                                                <strong>Efectivo en Boletería</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visitantes -->
+                        {% if visitantes %}
+                        <div class="mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user-friends me-2"></i>Visitantes
+                            </h5>
+                            <hr>
+                            <div class="row g-2">
+                                {% for visitante in visitantes %}
+                                <div class="col-md-6">
+                                    <div class="visitor-badge p-3 rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="fas fa-user-circle text-primary me-2"></i>
+                                                <strong>{{ visitante.nombre }}</strong>
+                                            </div>
+                                            <span class="badge bg-primary">{{ visitante.edad }} años</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Total a Pagar -->
+                        <div class="card bg-primary text-white mb-4">
+                            <div class="card-body text-center py-4">
+                                <h5 class="mb-2">Total a Pagar en Boletería</h5>
+                                <div class="total-display">${{ total|floatformat:0 }}</div>
+                            </div>
+                        </div>
+
+                        <!-- QR Code -->
+                        <div class="text-center mb-4 p-4 bg-light rounded">
+                            <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 12px; letter-spacing: 1px;">
+                                <i class="fas fa-qrcode me-2"></i>Escaneá este código en boletería
+                            </h6>
+                            <div class="qr-code">
+                                <svg viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- QR Code simulado -->
+                                    <rect width="29" height="29" fill="white"/>
+                                    <rect x="0" y="0" width="7" height="7" fill="black"/>
+                                    <rect x="1" y="1" width="5" height="5" fill="white"/>
+                                    <rect x="2" y="2" width="3" height="3" fill="black"/>
+                                    
+                                    <rect x="22" y="0" width="7" height="7" fill="black"/>
+                                    <rect x="23" y="1" width="5" height="5" fill="white"/>
+                                    <rect x="24" y="2" width="3" height="3" fill="black"/>
+                                    
+                                    <rect x="0" y="22" width="7" height="7" fill="black"/>
+                                    <rect x="1" y="23" width="5" height="5" fill="white"/>
+                                    <rect x="2" y="24" width="3" height="3" fill="black"/>
+                                    
+                                    <!-- Patrón del medio -->
+                                    <rect x="9" y="9" width="1" height="1" fill="black"/>
+                                    <rect x="11" y="9" width="1" height="1" fill="black"/>
+                                    <rect x="13" y="9" width="1" height="1" fill="black"/>
+                                    <rect x="15" y="9" width="1" height="1" fill="black"/>
+                                    <rect x="17" y="9" width="1" height="1" fill="black"/>
+                                    <rect x="19" y="9" width="1" height="1" fill="black"/>
+                                    
+                                    <rect x="9" y="11" width="1" height="1" fill="black"/>
+                                    <rect x="11" y="11" width="1" height="1" fill="black"/>
+                                    <rect x="15" y="11" width="1" height="1" fill="black"/>
+                                    <rect x="19" y="11" width="1" height="1" fill="black"/>
+                                    
+                                    <rect x="9" y="13" width="1" height="1" fill="black"/>
+                                    <rect x="13" y="13" width="1" height="1" fill="black"/>
+                                    <rect x="15" y="13" width="1" height="1" fill="black"/>
+                                    <rect x="17" y="13" width="1" height="1" fill="black"/>
+                                    <rect x="19" y="13" width="1" height="1" fill="black"/>
+                                    
+                                    <rect x="9" y="15" width="1" height="1" fill="black"/>
+                                    <rect x="11" y="15" width="1" height="1" fill="black"/>
+                                    <rect x="13" y="15" width="1" height="1" fill="black"/>
+                                    <rect x="17" y="15" width="1" height="1" fill="black"/>
+                                    <rect x="19" y="15" width="1" height="1" fill="black"/>
+                                    
+                                    <rect x="9" y="17" width="1" height="1" fill="black"/>
+                                    <rect x="11" y="17" width="1" height="1" fill="black"/>
+                                    <rect x="15" y="17" width="1" height="1" fill="black"/>
+                                    <rect x="17" y="17" width="1" height="1" fill="black"/>
+                                    <rect x="19" y="17" width="1" height="1" fill="black"/>
+                                    
+                                    <rect x="9" y="19" width="1" height="1" fill="black"/>
+                                    <rect x="13" y="19" width="1" height="1" fill="black"/>
+                                    <rect x="15" y="19" width="1" height="1" fill="black"/>
+                                    <rect x="17" y="19" width="1" height="1" fill="black"/>
+                                    <rect x="19" y="19" width="1" height="1" fill="black"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="row g-2 no-print">
+                            <div class="col-md-6">
+                                <button onclick="window.print()" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-print me-2"></i>Imprimir Comprobante
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="/comprar-entradas/" class="btn btn-secondary btn-lg w-100">
+                                    <i class="fas fa-home me-2"></i>Volver al Inicio
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer del Card -->
+                    <div class="card-footer bg-light text-center text-muted no-print">
+                        <small>
+                            <i class="fas fa-clock me-1"></i>
+                            Este comprobante es válido por 24 horas<br>
+                            Horario de atención: Martes a Domingo 10:00 - 20:00<br>
+                            <strong>¡Te esperamos!</strong>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="card shadow no-print">
+                    <div class="card-body">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Información Importante
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Llegá 15 minutos antes del horario de apertura
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Presentá tu DNI junto con este comprobante
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                El pago debe realizarse en efectivo exacto
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Una vez pagado, recibirás tus entradas impresas
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

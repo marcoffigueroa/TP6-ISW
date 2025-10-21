@@ -20,11 +20,19 @@ class ComprarEntradasForm(forms.Form):
     # Fecha de visita
     fecha_visita = forms.DateField(
         label="Fecha de visita",
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        widget=forms.DateInput(attrs={
+            'class': 'form-control', 
+            'type': 'date',
+            'min': datetime.date.today().strftime('%Y-%m-%d')
+        })
     )
     
     def clean_fecha_visita(self):
         fecha = self.cleaned_data['fecha_visita']
+        
+        # Validar que no sea una fecha pasada
+        if fecha < datetime.date.today():
+            raise ValidationError("No se pueden comprar entradas para fechas pasadas.")
         
         # Validar que no sea lunes
         if fecha.weekday() == 0:
