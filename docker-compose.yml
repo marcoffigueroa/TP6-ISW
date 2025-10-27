@@ -31,3 +31,4 @@ networks:
     # Le dice a Docker Compose que esta red ya existe y es gestionada
     # externamente (probablemente por Traefik)
     external: true
+    name: proxy_network
