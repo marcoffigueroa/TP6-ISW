@@ -19,9 +19,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.n8n.rule=Host(`icsg7.tvergara.cc`)"
-      - "traefik.http.routers.n8n.entrypoints=web"
-      - "traefik.http.services.n8n.loadbalancer.server.port=8000"
+      - "traefik.http.routers.icsg7.rule=Host(`icsg7.tvergara.cc`)"
+      - "traefik.http.routers.icsg7.entrypoints=web"
+      - "traefik.http.services.icsg7.loadbalancer.server.port=8000"
 
 networks:
   # Definición de red simplificada
