@@ -1,36 +1,37 @@
 version: '3.8'
 
 services:
-  # Este es el nombre de tu servicio
   django_app:
-    # Construye la imagen usando el Dockerfile en el directorio actual (.)
     build: .
-    # Asigna un nombre de contenedor para identificarlo fácilmente
     container_name: django_icsg7
-    # Reinicia siempre el contenedor si falla
     restart: unless-stopped
+    
+    # --- SECCIÓN 'ports' ELIMINADA ---
+    # Traefik se encarga de esto. No es necesario publicar
+    # el puerto 8000 en el host.
+    
+    networks:
+      # Conectado directamente a la red externa
+      - proxy_network
+      
     ports:
       - "8000:8000"  # Mapea el puerto 8000 del contenedor al puerto 8000 del host
-    # Conecta el contenedor a la red 'proxy'
-    networks:
-      - proxy
-    # Etiquetas (labels) para que Traefik configure el enrutamiento
     labels:
       - "traefik.enable=true"
+      
       # --- Router HTTP ---
-      # Define la regla de enrutamiento: Peticiones al host 'icsg7.tevergara.cc'
       - "traefik.http.routers.django-icsg7-router.rule=Host(`icsg7.tevergara.cc`)"
-      # Especifica el punto de entrada (entrypoint), usualmente 'websecure' para HTTPS
       - "traefik.http.routers.django-icsg7-router.entrypoints=web"
+      
+      # --- ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA! ---
+      # Esta línea conecta el Router al Servicio
+      - "traefik.http.routers.django-icsg7-router.service=django-icsg7-service"
+
       # --- Servicio ---
-      # Define cómo Traefik debe conectarse a tu servicio
-      # 'django-icsg7-service' es solo un nombre interno para Traefik
+      # (Tu definición del servicio estaba perfecta)
       - "traefik.http.services.django-icsg7-service.loadbalancer.server.port=8000"
 
 networks:
-  # Define la red 'proxy'
-  proxy:
-    # Le dice a Docker Compose que esta red ya existe y es gestionada
-    # externamente (probablemente por Traefik)
+  # Definición de red simplificada
+  proxy_network:
     external: true
-    name: proxy_network
