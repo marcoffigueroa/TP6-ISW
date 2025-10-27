@@ -75,7 +75,13 @@ class ComprarEntradasForm(forms.Form):
         attrs={
             'class': 'form-control',
             'id': 'cantidad_visitantes',
-            'onkeydown': "if(!['ArrowUp','ArrowDown','Tab','Backspace','Delete'].includes(event.key)) event.preventDefault();"
+            # Permitir teclado numérico en móviles y aceptar teclas comunes de navegación
+            'inputmode': 'numeric',
+            'pattern': '[0-9]*',
+            'min': '1',
+            'max': '10',
+            # onkeydown más permisivo: permite dígitos, teclas de navegación y acepta 'Unidentified' (teclados virtuales móviles)
+            'onkeydown': "if(!(event.key.length === 1 && /\\d/.test(event.key)) && !['ArrowUp','ArrowDown','Tab','Backspace','Delete','ArrowLeft','ArrowRight','Home','End'].includes(event.key) && event.key !== 'Unidentified') event.preventDefault();"
         }
     )
     )

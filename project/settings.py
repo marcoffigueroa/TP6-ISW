@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "icsg7.tvergara.cc",
-    "192.168.1.101"
+    "192.168.1.101",
+    "127.0.0.1"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
