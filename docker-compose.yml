@@ -18,18 +18,10 @@ services:
       - "8000:8000"  # Mapea el puerto 8000 del contenedor al puerto 8000 del host
     labels:
       - "traefik.enable=true"
-      
-      # --- Router HTTP ---
-      - "traefik.http.routers.django-icsg7-router.rule=Host(`icsg7.tevergara.cc`)"
-      - "traefik.http.routers.django-icsg7-router.entrypoints=web"
-      
-      # --- ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA! ---
-      # Esta línea conecta el Router al Servicio
-      - "traefik.http.routers.django-icsg7-router.service=django-icsg7-service"
-
-      # --- Servicio ---
-      # (Tu definición del servicio estaba perfecta)
-      - "traefik.http.services.django-icsg7-service.loadbalancer.server.port=8000"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.n8n.rule=Host(`icsg7.tvergara.cc`)"
+      - "traefik.http.routers.n8n.entrypoints=web"
+      - "traefik.http.services.n8n.loadbalancer.server.port=8000"
 
 networks:
   # Definición de red simplificada
