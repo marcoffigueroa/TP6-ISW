@@ -16,8 +16,8 @@ services:
     labels:
       - "traefik.enable=true"
       # --- Router HTTP ---
-      # Define la regla de enrutamiento: Peticiones al host 'icsg7.ws.tevergara.cc'
-      - "traefik.http.routers.django-icsg7-router.rule=Host(`icsg7.ws.tevergara.cc`)"
+      # Define la regla de enrutamiento: Peticiones al host 'icsg7.tevergara.cc'
+      - "traefik.http.routers.django-icsg7-router.rule=Host(`icsg7.tevergara.cc`)"
       # Especifica el punto de entrada (entrypoint), usualmente 'websecure' para HTTPS
       - "traefik.http.routers.django-icsg7-router.entrypoints=web"
       # --- Servicio ---
