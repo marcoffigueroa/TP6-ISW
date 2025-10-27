@@ -8,7 +8,9 @@ services:
     # Asigna un nombre de contenedor para identificarlo fácilmente
     container_name: django_icsg7
     # Reinicia siempre el contenedor si falla
-    restart: always
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # Mapea el puerto 8000 del contenedor al puerto 8000 del host
     # Conecta el contenedor a la red 'proxy'
     networks:
       - proxy
