@@ -30,6 +30,9 @@ ALLOWED_HOSTS = [
     "192.168.1.101"
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://icsg7.tvergara.cc',
+]
 
 # Application definition
 
